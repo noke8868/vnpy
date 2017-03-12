@@ -215,7 +215,7 @@ class MainWindow(QtGui.QMainWindow):
             self.statusLabel.setText(self.getCpuMemory())
             
         dt = datetime.now()
-        if dt.hour == 20  or dt.hour == 8:
+        if dt.hour == 20 or dt.hour == 8:
             if dt.minute == 58  and dt.second == 0:
                 self.connectCtp()
                 sleep(10)
