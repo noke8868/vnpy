@@ -164,7 +164,7 @@ class DrEngine(object):
                     self.writeDrLog(u'记录分钟线数据%s，时间:%s, O:%s, H:%s, L:%s, C:%s'
                                         % (newBar.vtSymbol, newBar.time, newBar.open, newBar.high,
                                            newBar.low, newBar.close))
-                    #self.procecssBar(newBar)
+                    #self.procecss5MinBar(newBar)
 
                 bar.vtSymbol = drTick.vtSymbol
                 bar.symbol = drTick.symbol
@@ -211,7 +211,7 @@ class DrEngine(object):
                                    daybar.low, daybar.close))
 
     #----------------------------------------------------------------------
-    def procecssBar(self,bar):
+    def procecss5MinBar(self,bar):
         vtSymbol = bar.vtSymbol
         if vtSymbol in self.m5barDict :
             m5bar = self.m5barDict[vtSymbol]
@@ -241,11 +241,11 @@ class DrEngine(object):
                 newBar.datetime = bar.datetime.replace(second=0,microsecond=0)
                 newBar.date = bar.date
                 newBar.time = bar.time
-                self.insertData(MINUTE5_DB_NAME, vtSymbol, newBar)
+                self.insertData(MINUTE_5_DB_NAME, vtSymbol, newBar)
 
                 if vtSymbol in self.activeSymbolDict:
                     activeSymbol = self.activeSymbolDict[vtSymbol]
-                    self.insertData(MINUTE5_DB_NAME, activeSymbol, newBar)
+                    self.insertData(MINUTE_5_DB_NAME, activeSymbol, newBar)
 
                 self.writeDrLog(u'记录5分钟线数据%s，时间:%s, O:%s, H:%s, L:%s, C:%s'
                                     %(newBar.vtSymbol, newBar.time, newBar.open, newBar.high,

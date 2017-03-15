@@ -459,5 +459,5 @@ if __name__ == '__main__':
     # loadMinuteTxt('TXTMIN5/SQauS06.TXT', MINUTE5_DB_NAME, 'au1706')
     # loadDayTxt('TXTDAY/SQauS06.TXT', DAILY_DB_NAME, 'au1706')
     loadMinuteTxt('TXTMIN1/SQrb05.TXT', MINUTE_DB_NAME, 'rb1705')
-    loadMinuteTxt('TXTMIN5/SQrb05.TXT', MINUTE5_DB_NAME, 'rb1705')
+    loadMinuteTxt('TXTMIN5/SQrb05.TXT', MINUTE_5_DB_NAME, 'rb1705')
     loadDayTxt('TXTDAY/SQrb05.TXT', DAILY_DB_NAME, 'rb1705')

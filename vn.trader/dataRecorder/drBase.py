@@ -17,8 +17,8 @@ SETTING_DB_NAME = 'VnTrader_Setting_Db'
 TICK_DB_NAME = 'VnTrader_Tick_Db'
 DAILY_DB_NAME = 'VnTrader_Daily_Db'
 MINUTE_DB_NAME = 'VnTrader_1Min_Db'
-MINUTE5_DB_NAME = 'VnTrader_5Min_Db'
-
+MINUTE_5_DB_NAME = 'VnTrader_5Min_Db'
+MINUTE_3_DB_NAME = 'VnTrader_3Min_Db'
 
 # CTA引擎中涉及的数据类定义
 from vtConstant import EMPTY_UNICODE, EMPTY_STRING, EMPTY_FLOAT, EMPTY_INT
