@@ -49,8 +49,8 @@ class AtrRsiStrategy(CtaTemplate):
 
     H1Value = 0
     L1Value = 0
-    C1Array = 0
-    O1Array = 0
+    C1Value = 0
+    O1Value = 0
     UPorDOWNValue = 0
 
 
@@ -256,8 +256,11 @@ class AtrRsiStrategy(CtaTemplate):
                     self.C1Array[-1] = self.closeArray[-1]
                     self.UPorDOWNArray[-1] = 1
 
-
-
+        self.O1Value = self.O1Array[-1]
+        self.L1Value = self.L1Array[-1]
+        self.H1Value = self.H1Array[-1]
+        self.C1Value = self.C1Array[-1]
+        self.UPorDOWNValue = self.UPorDOWNArray[-1]
 
         # 判断是否要进行交易
 
@@ -266,19 +269,17 @@ class AtrRsiStrategy(CtaTemplate):
             self.intraTradeHigh = bar.high
             self.intraTradeLow = bar.low
 
-            # ATR数值上穿其移动平均线，说明行情短期内波动加大
-            # 即处于趋势的概率较大，适合CTA开仓
-            if self.atrValue > self.atrMa:
-                # 使用RSI指标的趋势行情时，会在超买超卖区钝化特征，作为开仓信号
-                if self.rsiValue > self.rsiBuy:
-                    # 这里为了保证成交，选择超价5个整指数点下单
-                    self.buy(bar.close+5, self.fixedSize)
+            # 当前K线上涨前一K线下跌买入开仓
+            if self.UPorDOWNArray[-1] == 1 and self.UPorDOWNArray[-2] == 0:
+                # 这里为了保证成交，选择超价5个整指数点下单
+                self.buy(bar.close + 5, self.fixedSize)
+            # 当前K线下跌前一K线上涨卖出开仓
+            elif self.UPorDOWNArray[-1] == 0 and self.UPorDOWNArray[-2] == 1:
+                self.short(bar.close - 5, self.fixedSize)
 
-                elif self.rsiValue < self.rsiSell:
-                    self.short(bar.close-5, self.fixedSize)
 
         # 持有多头仓位
-        elif self.pos == 1:
+        elif self.pos == self.fixedSize:
             # 计算多头持有期内的最高价，以及重置最低价
             self.intraTradeHigh = max(self.intraTradeHigh, bar.high)
             self.intraTradeLow = bar.low
@@ -289,7 +290,7 @@ class AtrRsiStrategy(CtaTemplate):
             self.orderList.append(orderID)
 
         # 持有空头仓位
-        elif self.pos == -1:
+        elif self.pos == -self.fixedSize:
             self.intraTradeLow = min(self.intraTradeLow, bar.low)
             self.intraTradeHigh = bar.high
 
