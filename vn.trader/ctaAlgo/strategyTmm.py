@@ -21,15 +21,11 @@ class AtrRsiStrategy(CtaTemplate):
     """结合ATR和RSI指标的一个分钟线交易策略"""
     className = 'AtrRsiStrategy'
     author = u'用Python的交易员'
-
+    barDbName = MINUTE_3_DB_NAME
     # 策略参数
-    atrLength = 22          # 计算ATR指标的窗口数
-    atrMaLength = 10        # 计算ATR均线的窗口数
-    rsiLength = 5           # 计算RSI的窗口数
-    rsiEntry = 16           # RSI的开仓信号
     trailingPercent = 1.0   # 百分比移动止损
     initDays = 10           # 初始化数据所用的天数
-    fixedSize = 1           # risk
+    fixedSize = 4           # 开仓
     useTrailingStop = False # 是否使用跟踪止损
     profitLock = 30         # 利润锁定
     trailingStop = 20       # 跟踪止损
@@ -51,14 +47,13 @@ class AtrRsiStrategy(CtaTemplate):
     O1Array = np.zeros(bufferSize)      # K线开盘价的数组
     UPorDOWNArray = np.zeros(bufferCount)
 
-    atrCount = 0                        # 目前已经缓存了的ATR的计数
-    atrArray = np.zeros(bufferSize)     # ATR指标的数组
-    atrValue = 0                        # 最新的ATR指标数值
-    atrMa = 0                           # ATR移动平均的数值
+    H1Value = 0
+    L1Value = 0
+    C1Array = 0
+    O1Array = 0
+    UPorDOWNValue = 0
 
-    rsiValue = 0                        # RSI指标的数值
-    rsiBuy = 0                          # RSI买开阈值
-    rsiSell = 0                         # RSI卖开阈值
+
     intraTradeHigh = 0                  # 移动止损用的持仓期内最高价
     intraTradeLow = 0                   # 移动止损用的持仓期内最低价
 
@@ -71,22 +66,17 @@ class AtrRsiStrategy(CtaTemplate):
                  'className',
                  'author',
                  'vtSymbol',
-                 'atrLength',
-                 'atrMaLength',
-                 'rsiLength',
-                 'rsiEntry',
                  'trailingPercent']
 
     # 变量列表，保存了变量的名称
     varList = ['inited',
                'trading',
                'pos',
-
-               'atrValue',
-               'atrMa',
-               'rsiValue',
-               'rsiBuy',
-               'rsiSell']
+               'H1Value',
+               'L1Value',
+               'O1Value',
+               'C1Value',
+               'UPorDOWNValue']
 
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
@@ -266,8 +256,6 @@ class AtrRsiStrategy(CtaTemplate):
                     self.C1Array[-1] = self.closeArray[-1]
                     self.UPorDOWNArray[-1] = 1
 
-        if self.bufferCount < self.bufferSize:
-            return
 
 
 
