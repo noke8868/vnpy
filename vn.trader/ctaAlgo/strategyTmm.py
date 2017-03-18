@@ -226,7 +226,7 @@ class AtrRsiStrategy(CtaTemplate):
                     self.C1Array[-1] = self.closeArray[-1]
                     self.UPorDOWNArray[-1] = 0
 
-        if self.UPorDOWNArray[-2] == 0:                     #昨天是上涨
+        if self.UPorDOWNArray[-2] == 0:                     #昨天是下跌
 
             if self.closeArray[-1] < self.L1Array[-2]:      #第一种情况，下跌：今天的收盘价超过前一个柱子的最低点
 
@@ -266,37 +266,64 @@ class AtrRsiStrategy(CtaTemplate):
 
         # 当前无仓位
         if self.pos == 0:
-            self.intraTradeHigh = bar.high
-            self.intraTradeLow = bar.low
+
 
             # 当前K线上涨前一K线下跌买入开仓
-            if self.UPorDOWNArray[-1] == 1 and self.UPorDOWNArray[-2] == 0:
+            if self.UPorDOWNArray[-1] == 1 :
                 # 这里为了保证成交，选择超价5个整指数点下单
-                self.buy(bar.close + 5, self.fixedSize)
+                orderID = self.buy(bar.close + 5, self.fixedSize)
+                self.orderList.append(orderID)
             # 当前K线下跌前一K线上涨卖出开仓
-            elif self.UPorDOWNArray[-1] == 0 and self.UPorDOWNArray[-2] == 1:
-                self.short(bar.close - 5, self.fixedSize)
+            elif self.UPorDOWNArray[-1] == 0  :
+                orderID = self.short(bar.close - 5, self.fixedSize)
+                self.orderList.append(orderID)
 
 
         # 持有多头仓位
         elif self.pos == self.fixedSize:
-            # 计算多头持有期内的最高价，以及重置最低价
-            self.intraTradeHigh = max(self.intraTradeHigh, bar.high)
-            self.intraTradeLow = bar.low
-            # 计算多头移动止损
-            longStop = self.intraTradeHigh * (1-self.trailingPercent/100)
-            # 发出本地止损委托，并且把委托号记录下来，用于后续撤单
-            orderID = self.sell(longStop, abs(self.pos), stop=True)
-            self.orderList.append(orderID)
+            # 为上涨，且盈利大于等于20个点，卖出平仓一半
+            if self.UPorDOWNValue == 1 and bar.close - self.lastEntryPrice >=20 :
+                orderID = self.sell(bar.close - 5, abs(self.pos/2))
+                self.orderList.append(orderID)
+
+            # 当前K线下跌前一K线上涨卖出开仓
+            if self.UPorDOWNArray[-1] == 0 :
+                orderID = self.sell(bar.close - 5, abs(self.pos))
+                self.orderList.append(orderID)
+                orderID = self.short(bar.close - 5, self.fixedSize)
+                self.orderList.append(orderID)
+
+
 
         # 持有空头仓位
         elif self.pos == -self.fixedSize:
-            self.intraTradeLow = min(self.intraTradeLow, bar.low)
-            self.intraTradeHigh = bar.high
+            # 为下跌，且盈利大于等于20个点，买入平仓一半
+            if self.UPorDOWNValue == 0 and self.lastEntryPrice - bar.close >= 20:
+                orderID = self.cover(bar.close + 5, abs(self.pos / 2))
+                self.orderList.append(orderID)
 
-            shortStop = self.intraTradeLow * (1+self.trailingPercent/100)
-            orderID = self.cover(shortStop, abs(self.pos), stop=True)
-            self.orderList.append(orderID)
+            # 当前K线上涨前一K线下跌买入开仓
+            if self.UPorDOWNArray[-1] == 1 :
+                # 这里为了保证成交，选择超价5个整指数点下单
+                orderID = self.cover(bar.close + 5, abs(self.pos))
+                self.orderList.append(orderID)
+                orderID = self.buy(bar.close + 5, self.fixedSize)
+                self.orderList.append(orderID)
+        elif self.pos == self.fixedSize / 2:
+            # 当前K线下跌前一K线上涨卖出开仓
+            if self.UPorDOWNArray[-1] == 0:
+                orderID = self.sell(bar.close - 5, abs(self.pos))
+                self.orderList.append(orderID)
+                orderID = self.short(bar.close - 5, self.fixedSize)
+                self.orderList.append(orderID)
+        elif self.pos == -self.fixedSize / 2:
+            # 当前K线上涨前一K线下跌买入开仓
+            if self.UPorDOWNArray[-1] == 1:
+                # 这里为了保证成交，选择超价5个整指数点下单
+                orderID = self.cover(bar.close + 5, abs(self.pos))
+                self.orderList.append(orderID)
+                orderID = self.buy(bar.close + 5, self.fixedSize)
+                self.orderList.append(orderID)
 
         # 发出状态更新事件
         self.putEvent()
